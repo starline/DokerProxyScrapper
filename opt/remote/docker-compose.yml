@@ -9,7 +9,7 @@ services:
       args:
         USERNAME: remote
         PSWD: remote32qwe!
-    container_name: remote_desktop
+    container_name: remote_desktop_build
     ports:
       - "3389:3389"   # RDP
       - "3128:3128"   # Squid proxy (если включен)
