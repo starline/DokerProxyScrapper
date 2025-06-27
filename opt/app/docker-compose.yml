@@ -2,8 +2,14 @@ version: "3.8"
 
 services:
   desktop:
-    build: ./desktop
+    build: 
+      context: ./desktop
+      dockerfile: Dockerfile
+      args:
+        USERNAME: remote
+        PSWD: remote
     container_name: remote_desktop
+   
     ports:
       - "3389:3389"   # RDP
       - "3128:3128"   # Squid proxy (если включен)

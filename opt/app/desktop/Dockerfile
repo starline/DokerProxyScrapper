@@ -2,6 +2,11 @@ FROM debian:bookworm-slim
 
 ENV DEBIAN_FRONTEND=noninteractive
 
+# Задаём переменные на этапе сборки
+ARG USERNAME
+ARG PSWD
+ENV HOME_DIR=/home/${USERNAME}
+
 # Установка необходимых пакетов
 RUN apt-get update && apt-get install -y \
     sudo xrdp xfce4 xfce4-goodies dbus-x11 \
@@ -11,13 +16,23 @@ RUN apt-get update && apt-get install -y \
     apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Создание пользователя
-RUN useradd -m remote && echo "remote:remote" | chpasswd && adduser remote sudo
+RUN useradd -m $USERNAME && echo "$USERNAME:$PSWD" | chpasswd && adduser $USERNAME sudo
 
-# Настройка XFCE-сессии с клавиатурой us/ru и переключением Alt+Shift
-RUN echo -e '#!/bin/bash\nsetxkbmap -layout us,ru -option grp:alt_shift_toggle\nexec startxfce4' > /home/remote/.xsession && \
-    chmod +x /home/remote/.xsession && \
-    chown remote:remote /home/remote/.xsession && \
-    sed -i.bak '/fi/a startxfce4' /etc/xrdp/startwm.sh
+# Настройка клавиатуры через .xprofile
+RUN echo -e 'setxkbmap -layout us,ru -option grp:alt_shift_toggle' > ${HOME_DIR}/.xprofile && \
+    chown remote:remote ${HOME_DIR}/.xprofile && \
+    echo xfce4-session > ${HOME_DIR}/.xsession && \
+    chown remote:remote ${HOME_DIR}/.xsession
+
+# Автозапуск setxkbmap через .desktop
+RUN mkdir -p ${HOME_DIR}/.config/autostart && \
+    echo '[Desktop Entry]' > ${HOME_DIR}/.config/autostart/setxkbmap.desktop && \
+    echo 'Type=Application' >> ${HOME_DIR}/.config/autostart/setxkbmap.desktop && \
+    echo 'Exec=setxkbmap -layout us,ru -option grp:alt_shift_toggle' >> ${HOME_DIR}/.config/autostart/setxkbmap.desktop && \
+    echo 'Hidden=false' >> ${HOME_DIR}/.config/autostart/setxkbmap.desktop && \
+    echo 'NoDisplay=false' >> ${HOME_DIR}/.config/autostart/setxkbmap.desktop && \
+    echo 'X-GNOME-Autostart-enabled=true' >> ${HOME_DIR}/.config/autostart/setxkbmap.desktop && \
+    chown -R remote:remote ${HOME_DIR}/.config
 
 # Настройка базовой аутентификации Squid
 RUN htpasswd -cb /etc/squid/passwd squiduser squidpass && \
