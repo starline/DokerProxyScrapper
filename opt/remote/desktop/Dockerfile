@@ -9,10 +9,10 @@ ENV HOME_DIR=/home/${USERNAME}
 
 # Установка необходимых пакетов
 RUN apt-get update && apt-get install -y \
-    sudo xrdp xfce4 xfce4-goodies dbus-x11 \
-    chromium squid net-tools apache2-utils \
-    xorg xinit xserver-xorg-core xserver-xorg xorgxrdp && \
-    apt-get clean && rm -rf /var/lib/apt/lists/*
+    sudo xrdp dbus-x11 chromium squid net-tools apache2-utils \
+    xfce4-session xfce4-panel xfce4-terminal xfwm4 xfdesktop thunar mousepad \
+    xorg xinit xserver-xorg-core xserver-xorg xorgxrdp \
+    && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Создание пользователя
 RUN useradd -m $USERNAME && echo "$USERNAME:$PSWD" | chpasswd && adduser $USERNAME sudo
