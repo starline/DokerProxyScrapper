@@ -10,7 +10,7 @@ ENV HOME_DIR=/home/${USERNAME}
 # Установка необходимых пакетов
 RUN apt-get update && apt-get install -y \
     sudo xrdp dbus-x11 chromium squid net-tools apache2-utils \
-    xfce4-session xfce4-panel xfce4-terminal xfwm4 xfdesktop thunar mousepad \
+    xfce4-session xfce4-panel xfce4-terminal xfwm4 xfdesktop4 thunar mousepad \
     xorg xinit xserver-xorg-core xserver-xorg xorgxrdp \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
