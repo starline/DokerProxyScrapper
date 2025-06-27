@@ -11,7 +11,7 @@ ENV HOME_DIR=/home/${USERNAME}
 RUN apt-get update && apt-get install -y \
     sudo xrdp xfce4 xfce4-goodies dbus-x11 \
     chromium squid net-tools apache2-utils \
-    xserver-xorg-core xserver-xorg xorgxrdp \
+    xorg xinit xserver-xorg-core xserver-xorg xorgxrdp \
     --no-install-recommends && \
     apt-get clean && rm -rf /var/lib/apt/lists/*
 
