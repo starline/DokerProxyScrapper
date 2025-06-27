@@ -1,0 +1,9 @@
+services:
+
+  app:
+    image: remote-desktop
+    ports:
+      - "3389:3389"   # RDP
+      - "3128:3128"   # Squid proxy (если включен)
+    shm_size: 2g
+    restart: unless-stopped
