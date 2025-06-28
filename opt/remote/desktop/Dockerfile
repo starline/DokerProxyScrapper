@@ -3,9 +3,12 @@ FROM debian:bookworm
 ENV DEBIAN_FRONTEND=noninteractive
 
 # Задаём переменные на этапе сборки
-ARG USERNAME
+ARG USERNAME=remote
 ARG PSWD
-ENV HOME_DIR=/home/${USERNAME}
+ENV HOME_DIR=/home/remote
+
+# Создание пользователя
+RUN useradd -m -s /bin/bash remote && echo "remote:$PSWD" | chpasswd && adduser remote sudo
 
 # Устанавливаем supervisor
 RUN apt-get update && apt-get install -y supervisor
@@ -23,17 +26,16 @@ RUN apt-get install -y \
 
 # 3. Установка оконного менеджера XFCE и графических утилит
 RUN apt-get install -y \
-    xfce4-session xfce4-panel xfce4-terminal xfwm4 xfdesktop4 thunar mousepad
+    xfce4-session xfce4-panel xfce4-terminal xfwm4 xfdesktop4 thunar mousepad chromium
 
 # 4. Установка RDP и прокси
 RUN apt-get install -y \
-    xrdp xorgxrdp squid chromium
+    xrdp xorgxrdp squid
 
 # Уборка
 RUN apt-get clean && rm -rf /var/lib/apt/lists/*
 
-# Создание пользователя
-RUN useradd -m $USERNAME && echo "$USERNAME:$PSWD" | chpasswd && adduser $USERNAME sudo
+RUN echo "export DISPLAY=:0" >> /home/remote/.xsession
 
 # Настройка клавиатуры через .xprofile
 RUN echo -e 'setxkbmap -layout us,ru -option grp:alt_shift_toggle' > ${HOME_DIR}/.xprofile && \
@@ -63,4 +65,4 @@ RUN htpasswd -cb /etc/squid/passwd squiduser squidpass && \
 EXPOSE 3389 3128
 
 # Запуск служб напрямую
-CMD ["/usr/bin/supervisord"]
+CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/conf.d/supervisord.conf"]
