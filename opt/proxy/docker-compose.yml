@@ -1,0 +1,12 @@
+
+services:
+  squid:
+    build:
+      context: ./squid
+      args:
+        PROXY_USER: squiduser
+        PROXY_PASS: squidpassqwe
+    container_name: squid-proxy
+    ports:
+      - "3128:3128"
+    restart: unless-stopped

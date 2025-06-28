@@ -18,7 +18,7 @@ COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
 # 1. Базовые утилиты и зависимости
 RUN apt-get update && apt-get install -y \
-    sudo dbus-x11 net-tools apache2-utils xauth policykit-1
+    sudo dbus-x11 net-tools apache2-utils xauth policykit-1 xdg-utils
 
 # 2. Установка X-сервера и его компонентов
 RUN apt-get install -y \
@@ -27,6 +27,10 @@ RUN apt-get install -y \
 # 3. Установка оконного менеджера XFCE и графических утилит
 RUN apt-get install -y \
     xfce4-session xfce4-panel xfce4-terminal xfwm4 xfdesktop4 thunar mousepad chromium exo-utils
+
+# Set Chromium as the default browser
+RUN update-alternatives --install /usr/bin/x-www-browser x-www-browser /usr/bin/chromium 200 && \
+    update-alternatives --set x-www-browser /usr/bin/chromium
 
 # 4. Установка RDP и прокси
 RUN apt-get install -y \
@@ -52,6 +56,11 @@ RUN mkdir -p ${HOME_DIR}/.config/autostart && \
     echo 'NoDisplay=false' >> ${HOME_DIR}/.config/autostart/setxkbmap.desktop && \
     echo 'X-GNOME-Autostart-enabled=true' >> ${HOME_DIR}/.config/autostart/setxkbmap.desktop && \
     chown -R $USERNAME:$USERNAME ${HOME_DIR}/.config
+
+# Configure Chromium as default browser for the remote user
+RUN mkdir -p ${HOME_DIR}/.local/share/applications && \
+    printf '[Default Applications]\ntext/html=chromium.desktop\nx-scheme-handler/http=chromium.desktop\nx-scheme-handler/https=chromium.desktop\n' > ${HOME_DIR}/.local/share/applications/mimeapps.list && \
+    chown -R $USERNAME:$USERNAME ${HOME_DIR}/.local
 
 # Настройка базовой аутентификации Squid
 RUN htpasswd -cb /etc/squid/passwd squiduser squidpass && \
