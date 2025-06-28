@@ -5,7 +5,7 @@ services:
       context: ./squid
       args:
         PROXY_USER: squid
-        PROXY_PASS: proxydoc32!
+        PROXY_PASS: proxydoc32rom
     container_name: squid-proxy
     ports:
       - "3128:3128"
