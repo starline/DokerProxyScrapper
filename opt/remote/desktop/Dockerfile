@@ -12,7 +12,7 @@ RUN apt-get update && apt-get install -y \
     sudo xrdp dbus-x11 chromium squid net-tools apache2-utils \
     xfce4-session xfce4-panel xfce4-terminal xfwm4 xfdesktop4 thunar mousepad \
     xorg xinit xserver-xorg-core xserver-xorg xorgxrdp \
-    xauth dbus policykit-1 \
+    xauth dbus policykit-1 xserver-xorg-video-dummy \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Создание пользователя
@@ -21,7 +21,7 @@ RUN useradd -m $USERNAME && echo "$USERNAME:$PSWD" | chpasswd && adduser $USERNA
 # Настройка клавиатуры через .xprofile
 RUN echo -e 'setxkbmap -layout us,ru -option grp:alt_shift_toggle' > ${HOME_DIR}/.xprofile && \
     chown remote:remote ${HOME_DIR}/.xprofile && \
-    echo xfce4-session > ${HOME_DIR}/.xsession && \
+    echo startxfce4 > ${HOME_DIR}/.xsession && \
     chown remote:remote ${HOME_DIR}/.xsession
 
 # Автозапуск setxkbmap через .desktop
