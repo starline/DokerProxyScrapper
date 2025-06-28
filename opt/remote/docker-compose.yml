@@ -3,7 +3,7 @@ version: "3.8"
 services:
 
   desktop:
-    build: 
+    build:
       context: ./desktop
       dockerfile: Dockerfile
       args:

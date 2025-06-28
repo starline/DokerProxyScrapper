@@ -1,4 +1,4 @@
-FROM debian:bookworm-slim
+FROM debian:bookworm
 
 ENV DEBIAN_FRONTEND=noninteractive
 
@@ -7,13 +7,30 @@ ARG USERNAME
 ARG PSWD
 ENV HOME_DIR=/home/${USERNAME}
 
-# Установка необходимых пакетов
+# Устанавливаем supervisor
+RUN apt-get update && apt-get install -y supervisor
+
+# Копируем конфигурацию
+COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
+
+# 1. Базовые утилиты и зависимости
 RUN apt-get update && apt-get install -y \
-    sudo xrdp dbus-x11 chromium squid net-tools apache2-utils \
-    xfce4-session xfce4-panel xfce4-terminal xfwm4 xfdesktop4 thunar mousepad \
-    xorg xinit xserver-xorg-core xserver-xorg xorgxrdp \
-    xauth dbus policykit-1 xserver-xorg-video-dummy \
-    && apt-get clean && rm -rf /var/lib/apt/lists/*
+    sudo dbus-x11 net-tools apache2-utils xauth policykit-1
+
+# 2. Установка X-сервера и его компонентов
+RUN apt-get install -y \
+    xorg xinit xserver-xorg-core xserver-xorg xserver-xorg-video-dummy
+
+# 3. Установка оконного менеджера XFCE и графических утилит
+RUN apt-get install -y \
+    xfce4-session xfce4-panel xfce4-terminal xfwm4 xfdesktop4 thunar mousepad
+
+# 4. Установка RDP и прокси
+RUN apt-get install -y \
+    xrdp xorgxrdp squid chromium
+
+# Уборка
+RUN apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Создание пользователя
 RUN useradd -m $USERNAME && echo "$USERNAME:$PSWD" | chpasswd && adduser $USERNAME sudo
@@ -46,7 +63,4 @@ RUN htpasswd -cb /etc/squid/passwd squiduser squidpass && \
 EXPOSE 3389 3128
 
 # Запуск служб напрямую
-CMD ["/bin/bash", "-c", "\
-    /usr/sbin/squid && \
-    /usr/sbin/xrdp-sesman && \
-    /usr/sbin/xrdp -nodaemon"]
+CMD ["/usr/bin/supervisord"]
