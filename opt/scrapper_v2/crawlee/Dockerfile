@@ -1,6 +1,6 @@
 FROM node:20-slim
 
-# Установим системные зависимости
+# Установим системные зависимости для запуска Chromium
 RUN apt-get update && apt-get install -y \
     ca-certificates \
     fonts-liberation \
@@ -31,8 +31,10 @@ WORKDIR /app
 COPY package*.json ./
 RUN npm install
 
-COPY . .
+# Копируем основной код
+COPY server.js .
+COPY render.js .
 
 EXPOSE 3000
 
-CMD ["npm", "start"]
+CMD ["node", "server.js"]
