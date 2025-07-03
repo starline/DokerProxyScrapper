@@ -1,6 +1,6 @@
 FROM node:20-slim
 
-# Установим зависимости, необходимые Chromium (включая libdrm)
+# Установим зависимости, необходимые для запуска Chromium
 RUN apt-get update && apt-get install -y \
     wget \
     ca-certificates \
@@ -30,11 +30,19 @@ RUN apt-get update && apt-get install -y \
 # Рабочая директория
 WORKDIR /app
 
+# Копируем зависимости
 COPY package*.json ./
 RUN npm install
 
+# Копируем основной код
 COPY server.js .
 
+# Указываем переменную окружения для Puppeteer (хранение Chromium)
+ENV PUPPETEER_CACHE_DIR=/app/.cache
+ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser
+
+# Открываем порт
 EXPOSE 3000
 
+# Запускаем приложение
 CMD ["node", "server.js"]
