@@ -24,10 +24,12 @@
 
 ```bash
 cd opt/proxy
+cp .env.example .env
+# отредактируйте .env: PROXY_USER, PROXY_PASS
 docker compose up -d --build
 ```
 
-Клиенту нужен HTTP-прокси на хосте: `host:3128`, логин и пароль задаются при сборке образа аргументами `PROXY_USER` и `PROXY_PASS` в `docker-compose.yml` (см. секцию `build.args`).
+Клиенту нужен HTTP-прокси на хосте: `host:3128`, логин и пароль задаются при сборке образа через переменные `PROXY_USER` и `PROXY_PASS` в файле `.env` в каталоге `opt/proxy` (см. `.env.example`). Файл `.env` в git не попадает.
 
 ### Скрапер v1 (Puppeteer API)
 
@@ -66,7 +68,7 @@ docker compose up -d --build
 
 ## Безопасность
 
-- Замените учётные данные в `docker-compose.yml` и в коде API (токен Bearer) перед выкладкой в открытую сеть.
+- Для прокси храните пароль только в `opt/proxy/.env` (шаблон — `.env.example`); в коде API (токен Bearer) замените учётные данные перед выкладкой в открытую сеть.
 - Не публикуйте порты прокси и RDP в интернет без firewall и сильных паролей.
 
 ## Лицензия и владение

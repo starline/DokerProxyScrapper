@@ -4,8 +4,8 @@ services:
     build:
       context: ./squid
       args:
-        PROXY_USER: squid
-        PROXY_PASS: proxydoc32rom
+        PROXY_USER: ${PROXY_USER:-squid}
+        PROXY_PASS: ${PROXY_PASS:?Set PROXY_PASS in .env (see .env.example)}
     container_name: squid-proxy
     ports:
       - "3128:3128"

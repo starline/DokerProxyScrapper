@@ -3,3 +3,4 @@
 
 # Secrets (do not commit)
 opt/scrapper/puppeteer/.env
+opt/proxy/.env
