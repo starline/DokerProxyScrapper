@@ -1,3 +1,4 @@
+require('dotenv').config();
 const express = require('express');
 const puppeteer = require('puppeteer-extra');
 const StealthPlugin = require('puppeteer-extra-plugin-stealth');
@@ -6,9 +7,12 @@ puppeteer.use(StealthPlugin());
 
 const app = express();
 const PORT = 3000;
+const API_TOKEN = process.env.API_TOKEN;
 
-// 🔐 Токен
-const API_TOKEN = 'qwerty321654nk32yfydsl1df';
+if (!API_TOKEN) {
+    console.error('FATAL: API_TOKEN is required (set in environment or .env file)');
+    process.exit(1);
+}
 
 // ✅ Middleware: проверка токена
 app.use((req, res, next) => {

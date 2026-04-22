@@ -1,2 +1,5 @@
 /.git
 *.tar
+
+# Secrets (do not commit)
+opt/scrapper/puppeteer/.env
