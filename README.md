@@ -1,76 +1,76 @@
 # Docker Proxy
 
-Набор Docker-сервисов для **HTTP-прокси (Squid)** и **серверного рендеринга веб-страниц** (Puppeteer / Crawlee), плюс опциональный образ **удалённого рабочего стола** с RDP. Проект рассчитан на развёртывание через Docker Compose по каталогам в `opt/`.
+A set of Docker services for an **HTTP proxy (Squid)** and **server-side web page rendering** (Puppeteer / Crawlee), plus an optional **remote desktop** image with RDP. The project is meant to be deployed with Docker Compose from the directories under `opt/`.
 
-## Структура
+## Layout
 
-| Каталог | Назначение |
-|---------|------------|
-| `opt/proxy` | Squid с Basic-аутентификацией, порт **3128** |
-| `opt/scrapper` | HTTP API на Express + Puppeteer (stealth), порт **3000** |
-| `opt/scrapper_v2` | Та же идея через **Crawlee** + Puppeteer, порт **3000** |
-| `opt/remote` | Debian + XFCE + **xrdp** (RDP **3389**), в образе также есть Squid/Chromium для сценариев «десктоп + прокси» |
+| Directory   | Purpose |
+|------------|---------|
+| `opt/proxy` | Squid with Basic auth, port **3128** |
+| `opt/scrapper` | HTTP API on Express + Puppeteer (stealth), port **3000** |
+| `opt/scrapper_v2` | Same idea via **Crawlee** + Puppeteer, port **3000** |
+| `opt/remote` | Debian + XFCE + **xrdp** (RDP **3389**); the image also includes Squid/Chromium for “desktop + proxy” scenarios |
 
-## Требования
+## Requirements
 
-- Docker и Docker Compose v2
-- Для сборки скраперов: достаточно ресурсов под Chromium (рекомендуется выделить память контейнерам при необходимости)
+- Docker and Docker Compose v2
+- For building the scrapers: enough resources for Chromium (consider raising container memory limits if needed)
 
-## Быстрый старт
+## Quick start
 
-Команды выполняйте из соответствующего каталога.
+Run commands from the matching directory.
 
-### Прокси Squid
+### Squid proxy
 
 ```bash
 cd opt/proxy
 cp .env.example .env
-# отредактируйте .env: PROXY_USER, PROXY_PASS
+# edit .env: PROXY_USER, PROXY_PASS
 docker compose up -d --build
 ```
 
-Клиенту нужен HTTP-прокси на хосте: `host:3128`, логин и пароль задаются при сборке образа через переменные `PROXY_USER` и `PROXY_PASS` в файле `.env` в каталоге `opt/proxy` (см. `.env.example`). Файл `.env` в git не попадает.
+Clients use an HTTP proxy on the host: `host:3128`. Username and password are set at image build time via `PROXY_USER` and `PROXY_PASS` in `opt/proxy/.env` (see `.env.example`). The `.env` file is not committed to git.
 
-### Скрапер v1 (Puppeteer API)
+### Scraper v1 (Puppeteer API)
 
 ```bash
 cd opt/scrapper
 docker compose up -d --build
 ```
 
-- Эндпоинт: `GET /render?url=<encoded_url>`
-- Аутентификация: заголовок `Authorization: Bearer <токен>` (токен задан в коде `server.js` — перед продакшеном лучше вынести в переменные окружения).
+- Endpoint: `GET /render?url=<encoded_url>`
+- Auth: `Authorization: Bearer <token>` header (the token is hardcoded in `server.js`—move it to environment variables before production).
 
-### Скрапер v2 (Crawlee)
+### Scraper v2 (Crawlee)
 
 ```bash
 cd opt/scrapper_v2
 docker compose up -d --build
 ```
 
-- Эндпоинт: `GET /render?url=<url>`  
-- Опционально: `proxy` — URL прокси для запроса (совместимо с цепочкой «ваш Squid» или внешним прокси).
+- Endpoint: `GET /render?url=<url>`
+- Optional: `proxy`—proxy URL for the request (works with your Squid or an external proxy).
 
-### Удалённый рабочий стол (опционально)
+### Remote desktop (optional)
 
 ```bash
 cd opt/remote
 docker compose up -d --build
 ```
 
-Учётные данные пользователя задаются аргументами сборки `USERNAME` и `PSWD` в `docker-compose.yml`. Порт **3389** — RDP.
+User credentials are set with build args `USERNAME` and `PSWD` in `docker-compose.yml`. Port **3389** is RDP.
 
-## Как компоненты стыкуются
+## How the pieces fit together
 
-1. **Squid** принимает исходящий HTTP(S) трафик приложений с авторизацией по логину/паролю.
-2. **Скраперы** открывают страницы в headless Chromium и отдают готовый HTML. Версия на Crawlee умеет ходить в интернет **через прокси** query-параметром.
-3. **Remote desktop** — отдельный сценарий: полноценный GUI и инструменты в одном контейнере (удобно для отладки или ручной работы за прокси).
+1. **Squid** handles outbound HTTP(S) from your apps with username/password auth.
+2. **Scrapers** load pages in headless Chromium and return rendered HTML. The Crawlee build can use the network **through a proxy** via a query parameter.
+3. **Remote desktop** is a separate use case: full GUI and tools in one container (handy for debugging or manual work behind a proxy).
 
-## Безопасность
+## Security
 
-- Для прокси храните пароль только в `opt/proxy/.env` (шаблон — `.env.example`); в коде API (токен Bearer) замените учётные данные перед выкладкой в открытую сеть.
-- Не публикуйте порты прокси и RDP в интернет без firewall и сильных паролей.
+- Keep the proxy password only in `opt/proxy/.env` (template: `.env.example`); for the API Bearer token, replace hardcoded credentials before exposing anything to the public internet.
+- Do not expose proxy and RDP ports to the internet without a firewall and strong passwords.
 
-## Лицензия и владение
+## License and ownership
 
-Внутренний/сервисный репозиторий; при необходимости добавьте файл лицензии отдельно.
+Internal/service repository; add a license file separately if you need one.
